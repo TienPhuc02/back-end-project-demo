@@ -5,6 +5,7 @@ import { ChaptersModule } from './chapters/chapters.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
+import { VolsModule } from './vols/vols.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
       inject: [ConfigService],
     }),
     ConfigModule.forRoot({ isGlobal: true }),
+    VolsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -39,6 +39,12 @@ export class ChaptersController {
     return this.chaptersService.findOne(id);
   }
 
+  @Post('/bulk-create')
+  @ResponseMessage('Create List Chapter  Success!!')
+  async createListUser(@Body() chapterList: CreateChapterDto[]) {
+    const newListUser = await this.chaptersService.createListChapter(chapterList);
+    return newListUser;
+  }
   @Patch(':id')
   @ResponseMessage('Update Chapter By Id Success!!')
   update(@Param('id') id: string, @Body() updateChapterDto: UpdateChapterDto) {

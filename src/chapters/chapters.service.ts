@@ -14,15 +14,28 @@ export class ChaptersService {
     private chapterModel: SoftDeleteModel<ChapterDocument>,
   ) {}
   async create(createChapterDto: CreateChapterDto) {
-    const { name, author } = createChapterDto;
+    const { name, author, vol } = createChapterDto;
     return await this.chapterModel.create({
       name,
       author,
+      vol,
     });
   }
-
+  async createListChapter(chapterList: CreateChapterDto[]) {
+    const listChapterPromises = chapterList.map(async (item) => {
+      const { name, author } = item;
+      const newChapter = {
+        name,
+        author,
+      };
+      return newChapter;
+    });
+    const hashedChapters = await Promise.all(listChapterPromises);
+    const newListChapter = await this.chapterModel.insertMany(hashedChapters);
+    return newListChapter;
+  }
   async findAll(current: string, pageSize: string, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+    const { filter, sort, population, projection } = aqp(qs);
     delete filter.current;
     delete filter.pageSize; // bỏ qua current và pageSize để lấy full item trước đã rồi lọc
     const offset: number = (+current - 1) * +pageSize; // bỏ qua bao nhiêu phần tử
@@ -44,7 +57,7 @@ export class ChaptersService {
       // bỏ qua bao nhiêu phần tử
       .limit(defaultLimit)
       // bao nhiêu phần tử 1 trang
-      .select('-password')
+      .select(projection as any)
       .sort(sort as any)
       .populate(population)
       .exec();
@@ -62,21 +75,24 @@ export class ChaptersService {
   }
 
   async findOne(id: string) {
-    return await this.chapterModel.findOne({ _id: id });
+    return await this.chapterModel.findOne({ _id: id }).populate({
+      path: 'vol',
+    });
   }
 
   async update(id: string, updateChapterDto: UpdateChapterDto) {
-    const { name, author } = updateChapterDto;
-    return await this.chapterModel.updateOne({ _id: id }, { name, author });
+    const { name, author, vol } = updateChapterDto;
+    return await this.chapterModel.updateOne(
+      { _id: id },
+      { name, author, vol },
+    );
   }
 
   async remove(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return `not found user`;
     }
-    await this.chapterModel.updateOne(
-      { _id: id },
-    );
+    await this.chapterModel.updateOne({ _id: id });
     return this.chapterModel.softDelete({ _id: id });
   }
 }

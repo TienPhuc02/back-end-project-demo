@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Post } from 'src/posts/schema/post.schema';
 
 export type VolDocument = HydratedDocument<Vol>;
 
@@ -7,7 +8,7 @@ export type VolDocument = HydratedDocument<Vol>;
 export class Vol {
   @Prop()
   name: string;
-  @Prop({ type: [mongoose.Schema.Types.ObjectId] })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId],ref:Post.name })
   post: mongoose.Schema.Types.ObjectId[];
   @Prop()
   createdAt: Date;

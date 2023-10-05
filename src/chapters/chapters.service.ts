@@ -62,7 +62,6 @@ export class ChaptersService {
         }
       }
     }
-
     return processedChapters;
   }
 

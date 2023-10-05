@@ -6,12 +6,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import { Post } from 'src/posts/schema/post.schema';
 
 @Injectable()
 export class VolsService {
   constructor(
     @InjectModel(Vol.name)
     private volModel: SoftDeleteModel<VolDocument>,
+    @InjectModel(Post.name)
+    private postModel: SoftDeleteModel<VolDocument>,
   ) {}
   async create(createVolDto: CreateVolDto) {
     const { name } = createVolDto;
@@ -60,28 +63,71 @@ export class VolsService {
     };
   }
 
-  async createListVol(volList: CreateVolDto[]) {
-    if (!Array.isArray(volList)) {
-      // Xử lý khi userList không phải là mảng
-      return 'userList is not an array';
-    }
-    const volListPromises = volList.map(async (volDto) => {
-      const { name,post } = volDto;
-      const newVol = {
-        name,
-        post,
-      };
-      return newVol;
-    });
-    const hashedVols = await Promise.all(volListPromises);
+  async processVolsAndPosts(volArray) {
+    const processedVols = [];
 
-    const newListVol = await this.volModel.insertMany(hashedVols);
-    return {
-      newListVol
-    };
+    for (const volData of volArray) {
+      const { name, post } = volData;
+      const processedPosts = [];
+
+      if (post && post.length > 0) {
+        for (const postName of post) {
+          const existingPost = await this.postModel.findOne({ name: postName });
+
+          if (existingPost) {
+            processedPosts.push(existingPost._id);
+          } else {
+            // // Create a new vol and use its Object ID
+            const newPost = await this.postModel.create({ name: postName });
+            processedPosts.push(newPost._id);
+          }
+        }
+
+        const existingVols = await this.volModel.find({ name });
+        if (processedPosts.length > 0) {
+          if (existingVols.length > 0) {
+            for (const existingVol of existingVols) {
+              existingVol.post = processedPosts;
+              await existingVol.save();
+            }
+          } else {
+            const newVol = await this.volModel.create({
+              name,
+              post: processedPosts,
+            });
+            processedVols.push(newVol);
+          }
+        }
+      }
+    }
+    return processedVols;
+  }
+  async createListVol(volList: CreateVolDto[]) {
+    const processedChapters = await this.processVolsAndPosts(volList);
+    return processedChapters;
+    // if (!Array.isArray(volList)) {
+    //   // Xử lý khi userList không phải là mảng
+    //   return 'userList is not an array';
+    // }
+    // const volListPromises = volList.map(async (volDto) => {
+    //   const { name, post } = volDto;
+    //   const newVol = {
+    //     name,
+    //     post,
+    //   };
+    //   return newVol;
+    // });
+    // const hashedVols = await Promise.all(volListPromises);
+
+    // const newListVol = await this.volModel.insertMany(hashedVols);
+    // return {
+    //   newListVol,
+    // };
   }
   async findOne(id: string) {
-    return await this.volModel.findOne({ _id: id });
+    return await this.volModel.findOne({ _id: id }).populate({
+      path: 'post',
+    });
   }
 
   async update(id: string, updateVolDto: UpdateVolDto) {

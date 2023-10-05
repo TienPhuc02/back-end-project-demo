@@ -29,6 +29,12 @@ export class VolsController {
     return this.volsService.findOne(id);
   }
 
+  @Post('/bulk-create')
+  @ResponseMessage('Create List Vol  Success!!')
+  async createListUser(@Body() volList: CreateVolDto[]) {
+    const newListVol = await this.volsService.createListVol(volList);
+    return newListVol;
+  }
   @Patch(':id')
   @ResponseMessage('Update Vol By Id Success!!')
   update(@Param('id') id: string, @Body() updateVolDto: UpdateVolDto) {

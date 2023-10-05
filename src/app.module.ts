@@ -8,6 +8,7 @@ import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { VolsModule } from './vols/vols.module';
 import { AuthorsModule } from './authors/authors.module';
 import { PostsModule } from './posts/posts.module';
+import { LinesModule } from './lines/lines.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PostsModule } from './posts/posts.module';
     VolsModule,
     AuthorsModule,
     PostsModule,
+    LinesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

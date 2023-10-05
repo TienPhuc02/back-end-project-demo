@@ -66,26 +66,10 @@ export class ChaptersService {
     return processedChapters;
   }
 
-  // async updateChaptersWithVols(chapterArray) {
-  //   for (const chapterData of chapterArray) {
-  //     const { name, vol } = chapterData;
-
-  //     // Tìm các chương có cùng tên trong model Chapter
-  //     const existingChapters = await this.chapterModel.find({ name });
-
-  //     if (existingChapters.length > 0) {
-  //       // Nếu đã có chương với tên này, cập nhật mảng vol của chương đó
-  //       for (const existingChapter of existingChapters) {
-  //         existingChapter.vol = vol; // Ghi đè mảng vol bằng vol mới
-  //         await existingChapter.save();
-  //       }
-  //     }
-  //   }
-  // }
+ 
 
   async createListChapter(chapterList: CreateChapterDto[]) {
     const processedChapters = await this.processChaptersAndVols(chapterList);
-    // await this.updateChaptersWithVols(processedChapters);
     return processedChapters;
   }
   async findAll(current: string, pageSize: string, qs: string) {

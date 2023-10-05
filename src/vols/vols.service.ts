@@ -60,6 +60,26 @@ export class VolsService {
     };
   }
 
+  async createListVol(volList: CreateVolDto[]) {
+    if (!Array.isArray(volList)) {
+      // Xử lý khi userList không phải là mảng
+      return 'userList is not an array';
+    }
+    const volListPromises = volList.map(async (volDto) => {
+      const { name,post } = volDto;
+      const newVol = {
+        name,
+        post,
+      };
+      return newVol;
+    });
+    const hashedVols = await Promise.all(volListPromises);
+
+    const newListVol = await this.volModel.insertMany(hashedVols);
+    return {
+      newListVol
+    };
+  }
   async findOne(id: string) {
     return await this.volModel.findOne({ _id: id });
   }

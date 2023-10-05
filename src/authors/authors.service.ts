@@ -102,8 +102,11 @@ export class AuthorsService {
   }
 
   async findOne(id: string) {
-    return await this.authorModel.findOne({ _id: id })?.populate({
-      path: 'chapter',
+    return await this.authorModel.findOne({ _id: id }).populate({
+      path: 'chapter', // Tên trường tham chiếu đến Chapter
+      populate: {
+        path: 'vol', // Tên trường tham chiếu đến Vol bên trong Chapter
+      },
     });
   }
 

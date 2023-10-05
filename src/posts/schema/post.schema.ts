@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
-import { Chapter } from 'src/chapters/schema/chapter.schema';
+import { HydratedDocument } from 'mongoose';
 
 export type PostDocument = HydratedDocument<Post>;
 
@@ -10,8 +9,8 @@ export class Post {
   author: string;
   @Prop()
   address: string;
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Chapter.name })
-  chapter: mongoose.Schema.Types.ObjectId[];
+  // @Prop({ type: [mongoose.Schema.Types.ObjectId] })
+  // chapter: mongoose.Schema.Types.ObjectId[];
   @Prop()
   createdAt: Date;
   @Prop()
@@ -23,4 +22,3 @@ export class Post {
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
-

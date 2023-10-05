@@ -8,10 +8,6 @@ export type ChapterDocument = HydratedDocument<Chapter>;
 export class Chapter {
   @Prop()
   name: string;
-
-  @Prop()
-  author: string;
-
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Vol.name })
   vol: mongoose.Schema.Types.ObjectId[];
   @Prop()

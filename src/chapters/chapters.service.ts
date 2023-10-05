@@ -6,33 +6,87 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import { Vol, VolDocument } from 'src/vols/schema/vol.schema';
 
 @Injectable()
 export class ChaptersService {
   constructor(
     @InjectModel(Chapter.name)
     private chapterModel: SoftDeleteModel<ChapterDocument>,
+    @InjectModel(Vol.name)
+    private volModel: SoftDeleteModel<VolDocument>,
   ) {}
   async create(createChapterDto: CreateChapterDto) {
-    const { name, author, vol } = createChapterDto;
+    const { name, vol } = createChapterDto;
     return await this.chapterModel.create({
       name,
-      author,
       vol,
     });
   }
+
+  async processChaptersAndVols(chapterArray) {
+    const processedChapters = [];
+
+    for (const chapterData of chapterArray) {
+      const { name, vol } = chapterData;
+      const processedVols = [];
+
+      if (vol && vol.length > 0) {
+        for (const volName of vol) {
+          const existingVol = await this.volModel.findOne({ name: volName });
+
+          if (existingVol) {
+            processedVols.push(existingVol._id);
+          } else {
+            // // Create a new vol and use its Object ID
+            const newVol = await this.volModel.create({ name: volName });
+            processedVols.push(newVol._id);
+          }
+        }
+
+    
+        const existingChapters = await this.chapterModel.find({ name });
+        if (processedVols.length > 0) {
+          if (existingChapters.length > 0) {
+            for (const existingChapter of existingChapters) {
+              existingChapter.vol = processedVols; 
+              await existingChapter.save();
+            }
+          } else {
+            const newChapter = await this.chapterModel.create({
+              name,
+              vol: processedVols,
+            });
+            processedChapters.push(newChapter);
+          }
+        }
+      }
+    }
+
+    return processedChapters;
+  }
+
+  // async updateChaptersWithVols(chapterArray) {
+  //   for (const chapterData of chapterArray) {
+  //     const { name, vol } = chapterData;
+
+  //     // Tìm các chương có cùng tên trong model Chapter
+  //     const existingChapters = await this.chapterModel.find({ name });
+
+  //     if (existingChapters.length > 0) {
+  //       // Nếu đã có chương với tên này, cập nhật mảng vol của chương đó
+  //       for (const existingChapter of existingChapters) {
+  //         existingChapter.vol = vol; // Ghi đè mảng vol bằng vol mới
+  //         await existingChapter.save();
+  //       }
+  //     }
+  //   }
+  // }
+
   async createListChapter(chapterList: CreateChapterDto[]) {
-    const listChapterPromises = chapterList.map(async (item) => {
-      const { name, author } = item;
-      const newChapter = {
-        name,
-        author,
-      };
-      return newChapter;
-    });
-    const hashedChapters = await Promise.all(listChapterPromises);
-    const newListChapter = await this.chapterModel.insertMany(hashedChapters);
-    return newListChapter;
+    const processedChapters = await this.processChaptersAndVols(chapterList);
+    // await this.updateChaptersWithVols(processedChapters);
+    return processedChapters;
   }
   async findAll(current: string, pageSize: string, qs: string) {
     const { filter, sort, population, projection } = aqp(qs);
@@ -81,11 +135,8 @@ export class ChaptersService {
   }
 
   async update(id: string, updateChapterDto: UpdateChapterDto) {
-    const { name, author, vol } = updateChapterDto;
-    return await this.chapterModel.updateOne(
-      { _id: id },
-      { name, author, vol },
-    );
+    const { name, vol } = updateChapterDto;
+    return await this.chapterModel.updateOne({ _id: id }, { name, vol });
   }
 
   async remove(id: string) {

@@ -9,6 +9,7 @@ import { VolsModule } from './vols/vols.module';
 import { AuthorsModule } from './authors/authors.module';
 import { PostsModule } from './posts/posts.module';
 import { LinesModule } from './lines/lines.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LinesModule } from './lines/lines.module';
     AuthorsModule,
     PostsModule,
     LinesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

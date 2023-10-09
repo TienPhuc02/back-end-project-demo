@@ -19,19 +19,19 @@ export class AuthorsService {
   async processBooks(bookArray: string[]) {
     const processedBooks = [];
 
-    for (const chapter of bookArray) {
+    for (const book of bookArray) {
       // Check if the chapter already exists in the database
-      const existingChapter = await this.bookModel.findOne({
-        name: chapter,
+      const existingBook = await this.bookModel.findOne({
+        nameBook: book,
       });
 
-      if (existingChapter) {
+      if (existingBook) {
         // Use the existing chapter's Object ID
-        processedBooks.push(existingChapter._id);
+        processedBooks.push(existingBook._id);
       } else {
         // Create a new chapter and use its Object ID
-        const newChapter = await this.bookModel.create({ name: chapter });
-        processedBooks.push(newChapter._id);
+        const newBook = await this.bookModel.create({ nameBook: book });
+        processedBooks.push(newBook._id);
       }
     }
 
@@ -45,11 +45,11 @@ export class AuthorsService {
       gender,
       nation,
       phone,
-      book,
+      nameBook,
       avatar,
       totalBook,
     } = createAuthorDto;
-    const processedBooks = await this.processBooks(book);
+    const processedBooks = await this.processBooks(nameBook);
     return await this.authorModel.create({
       nameAuthor,
       phone,
@@ -58,7 +58,7 @@ export class AuthorsService {
       avatar,
       gender,
       address,
-      book: processedBooks,
+      nameBook: processedBooks,
     });
   }
 
@@ -104,11 +104,11 @@ export class AuthorsService {
 
   async findOne(id: string) {
     return await this.authorModel.findOne({ _id: id }).populate({
-      path: 'chapter',
+      path: 'nameBook',
       populate: {
-        path: 'vol',
+        path: 'chapter',
         populate: {
-          path: 'post',
+          path: 'vol',
         },
       },
     });
@@ -123,9 +123,9 @@ export class AuthorsService {
       phone,
       avatar,
       totalBook,
-      book,
+      nameBook,
     } = updateAuthorDto;
-    const processedBooks = await this.processBooks(book);
+    const processedBooks = await this.processBooks(nameBook);
     return await this.authorModel.updateOne(
       { _id: id },
       {
@@ -136,7 +136,7 @@ export class AuthorsService {
         phone,
         avatar,
         totalBook,
-        book: processedBooks,
+        nameBook: processedBooks,
       },
     );
   }

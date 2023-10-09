@@ -1,4 +1,4 @@
-import {  IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateAuthorDto {
   @IsNotEmpty({ message: 'Please Enter Name Author' })
@@ -13,10 +13,10 @@ export class CreateAuthorDto {
   gender: string;
   @IsNotEmpty({ message: 'Please Enter Nationality' })
   nation: string;
-  @IsNotEmpty({ message: 'Please Enter Book' })
-  book: string[];
   @IsNotEmpty({ message: 'Please Enter Phone' })
   phone: number;
   @IsNotEmpty({ message: 'Please Enter totalBook' })
   totalBook: number;
+  @IsNotEmpty({ message: 'Please Enter Book' })
+  nameBook: string[];
 }

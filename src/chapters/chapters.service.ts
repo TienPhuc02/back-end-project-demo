@@ -16,59 +16,65 @@ export class ChaptersService {
     @InjectModel(Vol.name)
     private volModel: SoftDeleteModel<VolDocument>,
   ) {}
-  async create(createChapterDto: CreateChapterDto) {
-    const { name, vol } = createChapterDto;
-    return await this.chapterModel.create({
-      name,
-      vol,
-    });
-  }
+  async processVols(volArray: string[]) {
+    const processedVols = [];
 
-  async processChaptersAndVols(chapterArray) {
-    const processedChapters = [];
+    for (const vol of volArray) {
+      // Check if the chapter already exists in the database
+      const existingVol = await this.volModel.findOne({
+        name: vol,
+      });
 
-    for (const chapterData of chapterArray) {
-      const { name, vol } = chapterData;
-      const processedVols = [];
-
-      if (vol && vol.length > 0) {
-        for (const volName of vol) {
-          const existingVol = await this.volModel.findOne({ name: volName });
-
-          if (existingVol) {
-            processedVols.push(existingVol._id);
-          } else {
-            // // Create a new vol and use its Object ID
-            const newVol = await this.volModel.create({ name: volName });
-            processedVols.push(newVol._id);
-          }
-        }
-        const existingChapters = await this.chapterModel.find({ name });
-        if (processedVols.length > 0) {
-          if (existingChapters.length > 0) {
-            for (const existingChapter of existingChapters) {
-              existingChapter.vol = processedVols; 
-              await existingChapter.save();
-            }
-          } else {
-            const newChapter = await this.chapterModel.create({
-              name,
-              vol: processedVols,
-            });
-            processedChapters.push(newChapter);
-          }
-        }
+      if (existingVol) {
+        // Use the existing chapter's Object ID
+        processedVols.push(existingVol._id);
+      } else {
+        // Create a new chapter and use its Object ID
+        const newVol = await this.volModel.create({ name: vol });
+        processedVols.push(newVol._id);
       }
     }
-    return processedChapters;
+
+    return processedVols;
   }
 
- 
-
-  async createListChapter(chapterList: CreateChapterDto[]) {
-    const processedChapters = await this.processChaptersAndVols(chapterList);
-    return processedChapters;
+  async create(createChapterDto: CreateChapterDto) {
+    const {
+      titleChapter,
+      nameAuthor,
+      nameBook,
+      descriptionChapter,
+      publicYear,
+      totalVol,
+      vol,
+    } = createChapterDto;
+    const processedVols = await this.processVols(vol);
+    const existingChapter = await this.chapterModel.findOne({
+      titleChapter,
+    });
+    if (existingChapter) {
+      existingChapter.descriptionChapter = descriptionChapter;
+      existingChapter.publicYear = publicYear;
+      existingChapter.totalVol = totalVol;
+      existingChapter.vol = processedVols;
+      // Lưu lại cuốn sách đã cập nhật
+      await existingChapter.save();
+      // Trả về cuốn sách đã cập nhật
+      return existingChapter;
+    } else {
+      const newChapter =await this.chapterModel.create({
+        titleChapter,
+        nameAuthor,
+        nameBook,
+        descriptionChapter,
+        publicYear,
+        totalVol,
+        vol: processedVols,
+      });
+      return newChapter;
+    }
   }
+
   async findAll(current: string, pageSize: string, qs: string) {
     const { filter, sort, population, projection } = aqp(qs);
     delete filter.current;
@@ -116,8 +122,28 @@ export class ChaptersService {
   }
 
   async update(id: string, updateChapterDto: UpdateChapterDto) {
-    const { name, vol } = updateChapterDto;
-    return await this.chapterModel.updateOne({ _id: id }, { name, vol });
+    const {
+      titleChapter,
+      nameAuthor,
+      nameBook,
+      descriptionChapter,
+      publicYear,
+      totalVol,
+      vol,
+    } = updateChapterDto;
+    const processedVols = await this.processVols(vol);
+    return await this.chapterModel.updateOne(
+      { _id: id },
+      {
+        titleChapter,
+        nameAuthor,
+        nameBook,
+        descriptionChapter,
+        publicYear,
+        totalVol,
+        vol: processedVols,
+      },
+    );
   }
 
   async remove(id: string) {

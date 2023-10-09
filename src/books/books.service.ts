@@ -6,39 +6,47 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import { Book, BookDocument } from './schema/book.schema';
+import { Chapter, ChapterDocument } from 'src/chapters/schema/chapter.schema';
+import { Author, AuthorDocument } from 'src/authors/schema/author.schema';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book.name)
     private bookModel: SoftDeleteModel<BookDocument>,
+    @InjectModel(Chapter.name)
+    private chapterModel: SoftDeleteModel<ChapterDocument>,
+    @InjectModel(Author.name)
+    private authorModel: SoftDeleteModel<AuthorDocument>,
   ) {}
-  // async processChapters(chapterArray: string[]) {
-  //   const processedChapters = [];
+  async processChapters(chapterArray: string[]) {
+    const processedChapters = [];
 
-  //   for (const chapter of chapterArray) {
-  //     // Check if the chapter already exists in the database
-  //     const existingChapter = await this.chapterModel.findOne({
-  //       name: chapter,
-  //     });
+    for (const chapter of chapterArray) {
+      // Check if the chapter already exists in the database
+      const existingChapter = await this.chapterModel.findOne({
+        titleChapter: chapter,
+      });
 
-  //     if (existingChapter) {
-  //       // Use the existing chapter's Object ID
-  //       processedChapters.push(existingChapter._id);
-  //     } else {
-  //       // Create a new chapter and use its Object ID
-  //       const newChapter = await this.chapterModel.create({ name: chapter });
-  //       processedChapters.push(newChapter._id);
-  //     }
-  //   }
+      if (existingChapter) {
+        // Use the existing chapter's Object ID
+        processedChapters.push(existingChapter._id);
+      } else {
+        // Create a new chapter and use its Object ID
+        const newChapter = await this.chapterModel.create({
+          titleChapter: chapter,
+        });
+        processedChapters.push(newChapter._id);
+      }
+    }
 
-  //   return processedChapters;
-  // }
+    return processedChapters;
+  }
 
   async create(createBookDto: CreateBookDto) {
     const {
       nameBook,
-      nameAuthor,
+      chapter,
       totalChapter,
       descriptionBook,
       publicYear,
@@ -48,20 +56,59 @@ export class BooksService {
       thumbnailBook,
       sliderBook,
     } = createBookDto;
-    // const processedChapters = await this.processChapters(chapter);
-    return await this.bookModel.create({
-      nameBook,
-      nameAuthor,
-      descriptionBook,
-      publicYear,
-      publisher,
-      genre,
-      totalChapter,
-      language,
-      thumbnailBook,
-      sliderBook,
-      // chapter: processedChapters,
+
+    const processedChapters = await this.processChapters(chapter);
+
+    const existingAuthor = await this.authorModel.findOne({
+      authorName: createBookDto.nameAuthor,
     });
+
+    if (existingAuthor) {
+      // Tên tác giả đã tồn tại, gán authorName từ kết quả truy vấn
+      createBookDto.nameAuthor = existingAuthor.nameAuthor;
+    }
+    // Kiểm tra xem cuốn sách đã tồn tại dựa trên nameBook và nameAuthor
+    const existingBook = await this.bookModel.findOne({
+      nameBook,
+    });
+
+    if (existingBook) {
+      // Cuốn sách đã tồn tại, cập nhật thông tin của nó
+      existingBook.descriptionBook = descriptionBook;
+      existingBook.publicYear = publicYear;
+      existingBook.nameAuthor = createBookDto.nameAuthor;
+      existingBook.publisher = publisher;
+      existingBook.genre = genre;
+      existingBook.totalChapter = totalChapter;
+      existingBook.language = language;
+      existingBook.thumbnailBook = thumbnailBook;
+      existingBook.sliderBook = sliderBook;
+      existingBook.chapter = processedChapters;
+
+      // Lưu lại cuốn sách đã cập nhật
+      await existingBook.save();
+
+      // Trả về cuốn sách đã cập nhật
+      return existingBook;
+    } else {
+      // Cuốn sách chưa tồn tại, tạo mới nó
+      const newBook = await this.bookModel.create({
+        nameBook,
+        nameAuthor: createBookDto.nameAuthor,
+        descriptionBook,
+        publicYear,
+        publisher,
+        genre,
+        totalChapter,
+        language,
+        thumbnailBook,
+        sliderBook,
+        chapter: processedChapters,
+      });
+
+      // Trả về cuốn sách mới tạo
+      return newBook;
+    }
   }
 
   async findAll(current: string, pageSize: string, qs: string) {
@@ -109,9 +156,6 @@ export class BooksService {
       path: 'chapter',
       populate: {
         path: 'vol',
-        populate: {
-          path: 'post',
-        },
       },
     });
   }

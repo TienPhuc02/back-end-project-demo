@@ -9,7 +9,7 @@ export class Book {
   @Prop()
   nameBook: string;
   @Prop()
-  nameAuthor: mongoose.Schema.Types.ObjectId;
+  nameAuthor: string;
   @Prop()
   descriptionBook: string;
   @Prop()

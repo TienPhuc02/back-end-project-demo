@@ -7,7 +7,17 @@ export type ChapterDocument = HydratedDocument<Chapter>;
 @Schema({ timestamps: true })
 export class Chapter {
   @Prop()
-  name: string;
+  titleChapter: string;
+  @Prop()
+  nameAuthor: mongoose.Schema.Types.ObjectId;
+  @Prop()
+  nameBook: mongoose.Schema.Types.ObjectId;
+  @Prop()
+  descriptionChapter: string;
+  @Prop()
+  publicYear: number;
+  @Prop()
+  totalVol: number;
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Vol.name })
   vol: mongoose.Schema.Types.ObjectId[];
   @Prop()
@@ -16,6 +26,16 @@ export class Chapter {
   updatedAt: Date;
   @Prop()
   deletedAt: Date;
+  @Prop({ type: Object })
+  createdBy: {
+    id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+  @Prop({ type: Object })
+  updatedBy: {
+    id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
   @Prop()
   deleted: boolean;
 }

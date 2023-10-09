@@ -20,5 +20,5 @@ export class UpdateAuthorDto extends PartialType(CreateAuthorDto) {
   @IsNotEmpty({ message: 'Please Enter totalBook' })
   totalBook: number;
   @IsNotEmpty({ message: 'Please Enter Book' })
-  book: string[];
+  nameBook: string[];
 }

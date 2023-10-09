@@ -24,7 +24,7 @@ export class Author {
   @Prop()
   totalBook: number;
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Book.name })
-  book: mongoose.Schema.Types.ObjectId[];
+  nameBook: mongoose.Schema.Types.ObjectId[];
   @Prop()
   createdAt: Date;
   @Prop()

@@ -43,8 +43,6 @@ export class ChaptersService {
             processedVols.push(newVol._id);
           }
         }
-
-    
         const existingChapters = await this.chapterModel.find({ name });
         if (processedVols.length > 0) {
           if (existingChapters.length > 0) {

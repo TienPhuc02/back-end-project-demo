@@ -7,9 +7,17 @@ export type AuthorDocument = HydratedDocument<Author>;
 @Schema({ timestamps: true })
 export class Author {
   @Prop()
-  author: string;
+  nameAuthor: string;
   @Prop()
   address: string;
+  @Prop()
+  avatar: string;
+  @Prop()
+  gender: string;
+  @Prop()
+  nation: string;
+  @Prop()
+  phone: number;
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Chapter.name })
   chapter: mongoose.Schema.Types.ObjectId[];
   @Prop()

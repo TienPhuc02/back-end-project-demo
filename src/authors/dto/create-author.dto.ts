@@ -1,11 +1,16 @@
-import { IsArray, IsNotEmpty } from "class-validator";
+import {  IsNotEmpty } from 'class-validator';
 
 export class CreateAuthorDto {
-    @IsNotEmpty({ message: 'Please Enter Your Name' })
-    author: string ;
-    @IsNotEmpty({ message: 'Please Enter Your Address' })
-    address: string;
-    // @IsNotEmpty({ message: 'Please Enter Your Chapter' })
-    @IsArray({ message: 'Vol có dạng là array' })
-    chapter: string[];
+  @IsNotEmpty({ message: 'Please Enter Name Author' })
+  nameAuthor: string;
+  @IsNotEmpty({ message: 'Please Enter Address' })
+  address: string;
+  @IsNotEmpty({ message: 'Please Enter Avatar' })
+  avatar: string;
+  @IsNotEmpty({ message: 'Please Enter Gender' })
+  gender: string;
+  @IsNotEmpty({ message: 'Please Enter Nationality' })
+  nation: string;
+  @IsNotEmpty({ message: 'Please Enter Phone' })
+  phone: number;
 }

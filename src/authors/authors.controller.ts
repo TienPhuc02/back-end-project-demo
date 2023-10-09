@@ -40,12 +40,12 @@ export class AuthorsController {
     return this.authorsService.findOne(id);
   }
 
-  @Post('/bulk-create')
-  @ResponseMessage('Create List Author  Success!!')
-  async createListUser(@Body() authorList: CreateAuthorDto[]) {
-    const newListUser = await this.authorsService.createListAuthor(authorList);
-    return newListUser;
-  }
+  // @Post('/bulk-create')
+  // @ResponseMessage('Create List Author  Success!!')
+  // async createListUser(@Body() authorList: CreateAuthorDto[]) {
+  //   const newListUser = await this.authorsService.createListAuthor(authorList);
+  //   return newListUser;
+  // }
   @Patch(':id')
   @ResponseMessage('Update Author By Id Success!!')
   update(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorDto) {

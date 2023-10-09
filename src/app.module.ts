@@ -10,6 +10,7 @@ import { AuthorsModule } from './authors/authors.module';
 import { PostsModule } from './posts/posts.module';
 import { LinesModule } from './lines/lines.module';
 import { FilesModule } from './files/files.module';
+import { BooksModule } from './books/books.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FilesModule } from './files/files.module';
     PostsModule,
     LinesModule,
     FilesModule,
+    BooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

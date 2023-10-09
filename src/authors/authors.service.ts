@@ -16,49 +16,41 @@ export class AuthorsService {
     @InjectModel(Chapter.name)
     private chapterModel: SoftDeleteModel<ChapterDocument>,
   ) {}
-  async processChapters(chapterArray: string[]) {
-    const processedChapters = [];
+  // async processChapters(chapterArray: string[]) {
+  //   const processedChapters = [];
 
-    for (const chapter of chapterArray) {
-      // Check if the chapter already exists in the database
-      const existingChapter = await this.chapterModel.findOne({
-        name: chapter,
-      });
+  //   for (const chapter of chapterArray) {
+  //     // Check if the chapter already exists in the database
+  //     const existingChapter = await this.chapterModel.findOne({
+  //       name: chapter,
+  //     });
 
-      if (existingChapter) {
-        // Use the existing chapter's Object ID
-        processedChapters.push(existingChapter._id);
-      } else {
-        // Create a new chapter and use its Object ID
-        const newChapter = await this.chapterModel.create({ name: chapter });
-        processedChapters.push(newChapter._id);
-      }
-    }
+  //     if (existingChapter) {
+  //       // Use the existing chapter's Object ID
+  //       processedChapters.push(existingChapter._id);
+  //     } else {
+  //       // Create a new chapter and use its Object ID
+  //       const newChapter = await this.chapterModel.create({ name: chapter });
+  //       processedChapters.push(newChapter._id);
+  //     }
+  //   }
 
-    return processedChapters;
-  }
+  //   return processedChapters;
+  // }
 
   async create(createAuthorDto: CreateAuthorDto) {
-    const { author, address, chapter } = createAuthorDto;
-    const processedChapters = await this.processChapters(chapter);
+    const { nameAuthor, address, gender, nation, phone, avatar } =
+      createAuthorDto;
+    // const processedChapters = await this.processChapters(chapter);
     return await this.authorModel.create({
-      author,
+      nameAuthor,
+      phone,
+      nation,
+      avatar,
+      gender,
       address,
-      chapter: processedChapters,
+      // chapter: processedChapters,
     });
-  }
-  async createListAuthor(authorList: CreateAuthorDto[]) {
-    const listAuthorPromises = authorList.map(async (item) => {
-      const { author, address } = item;
-      const newAuthor = {
-        author,
-        address,
-      };
-      return newAuthor;
-    });
-    const hashedAuthors = await Promise.all(listAuthorPromises);
-    const newListAuthor = await this.authorModel.insertMany(hashedAuthors);
-    return newListAuthor;
   }
 
   async findAll(current: string, pageSize: string, qs: string) {
@@ -114,10 +106,11 @@ export class AuthorsService {
   }
 
   async update(id: string, updateAuthorDto: UpdateAuthorDto) {
-    const { author, address, chapter } = updateAuthorDto;
+    const { nameAuthor, address, gender, nation, phone, avatar } =
+      updateAuthorDto;
     return await this.authorModel.updateOne(
       { _id: id },
-      { author, address, chapter },
+      { nameAuthor, address, gender, nation, phone, avatar },
     );
   }
 

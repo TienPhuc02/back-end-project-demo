@@ -9,9 +9,9 @@ export class Chapter {
   @Prop()
   titleChapter: string;
   @Prop()
-  nameAuthor: mongoose.Schema.Types.ObjectId;
+  nameAuthor: string;
   @Prop()
-  nameBook: mongoose.Schema.Types.ObjectId;
+  nameBook: string;
   @Prop()
   descriptionChapter: string;
   @Prop()

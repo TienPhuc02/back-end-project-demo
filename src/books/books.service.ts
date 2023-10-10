@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {  BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,7 +56,17 @@ export class BooksService {
       thumbnailBook,
       sliderBook,
     } = createBookDto;
+    for (const chapterTitle of chapter) {
+      const existingChapter = await this.chapterModel.findOne({
+        titleChapter: chapterTitle,
+      });
 
+      if (existingChapter) {
+        throw new BadRequestException(
+          `Chương với tên "${chapterTitle}" đã tồn tại.Bạn vui lòng đặt với tên chương khác`,
+        );
+      }
+    }
     const processedChapters = await this.processChapters(chapter);
 
     const existingAuthor = await this.authorModel.findOne({
@@ -64,16 +74,13 @@ export class BooksService {
     });
 
     if (existingAuthor) {
-      // Tên tác giả đã tồn tại, gán authorName từ kết quả truy vấn
       createBookDto.nameAuthor = existingAuthor.nameAuthor;
     }
-    // Kiểm tra xem cuốn sách đã tồn tại dựa trên nameBook và nameAuthor
     const existingBook = await this.bookModel.findOne({
       nameBook,
     });
 
     if (existingBook) {
-      // Cuốn sách đã tồn tại, cập nhật thông tin của nó
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
       existingBook.nameAuthor = createBookDto.nameAuthor;
@@ -84,14 +91,9 @@ export class BooksService {
       existingBook.thumbnailBook = thumbnailBook;
       existingBook.sliderBook = sliderBook;
       existingBook.chapter = processedChapters;
-
-      // Lưu lại cuốn sách đã cập nhật
       await existingBook.save();
-
-      // Trả về cuốn sách đã cập nhật
       return existingBook;
     } else {
-      // Cuốn sách chưa tồn tại, tạo mới nó
       const newBook = await this.bookModel.create({
         nameBook,
         nameAuthor: createBookDto.nameAuthor,
@@ -105,8 +107,6 @@ export class BooksService {
         sliderBook,
         chapter: processedChapters,
       });
-
-      // Trả về cuốn sách mới tạo
       return newBook;
     }
   }
@@ -163,7 +163,7 @@ export class BooksService {
   async update(id: string, updateBookDto: UpdateBookDto) {
     const {
       nameBook,
-      nameAuthor,
+      chapter,
       descriptionBook,
       publicYear,
       publisher,
@@ -173,21 +173,51 @@ export class BooksService {
       thumbnailBook,
       sliderBook,
     } = updateBookDto;
-    return await this.bookModel.updateOne(
-      { _id: id },
-      {
-        nameBook,
-        nameAuthor,
-        descriptionBook,
-        totalChapter,
-        publicYear,
-        publisher,
-        genre,
-        language,
-        thumbnailBook,
-        sliderBook,
-      },
-    );
+    const processedChapters = await this.processChapters(chapter);
+
+    const existingAuthor = await this.authorModel.findOne({
+      authorName: updateBookDto.nameAuthor,
+    });
+
+    if (existingAuthor) {
+      updateBookDto.nameAuthor = existingAuthor.nameAuthor;
+    }
+    const existingBook = await this.bookModel.findOne({
+      nameBook,
+    });
+
+    if (existingBook) {
+      existingBook.descriptionBook = descriptionBook;
+      existingBook.publicYear = publicYear;
+      existingBook.nameAuthor = updateBookDto.nameAuthor;
+      existingBook.publisher = publisher;
+      existingBook.genre = genre;
+      existingBook.totalChapter = totalChapter;
+      existingBook.language = language;
+      existingBook.thumbnailBook = thumbnailBook;
+      existingBook.sliderBook = sliderBook;
+      existingBook.chapter = processedChapters;
+      await existingBook.save();
+      return existingBook;
+    } else {
+      const newBook = await this.bookModel.updateOne(
+        { _id: id },
+        {
+          nameBook,
+          nameAuthor: updateBookDto.nameAuthor,
+          descriptionBook,
+          publicYear,
+          publisher,
+          genre,
+          totalChapter,
+          language,
+          thumbnailBook,
+          sliderBook,
+          chapter: processedChapters,
+        },
+      );
+      return newBook;
+    }
   }
 
   async remove(id: string) {

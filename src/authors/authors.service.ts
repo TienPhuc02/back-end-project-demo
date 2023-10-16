@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -49,18 +49,17 @@ export class AuthorsService {
       avatar,
       totalBook,
     } = createAuthorDto;
-    for (const nameBookTitle of nameBook) {
-      const existingChapter = await this.bookModel.findOne({
-        nameBook: nameBookTitle,
-      });
 
-      if (existingChapter) {
-        throw new BadRequestException(
-          `Chương với tên "${nameBookTitle}" đã tồn tại.Bạn vui lòng đặt với tên Sách khác`,
-        );
-      }
+    const processedBooks = [];
+
+    for (const nameBookItems of nameBook) {
+      // Create a new chapter for each chapter title
+      const newBook = await this.bookModel.create({
+        nameBook: nameBookItems,
+        nameAuthor: nameAuthor,
+      });
+      processedBooks.push(newBook._id);
     }
-    const processedBooks = await this.processBooks(nameBook);
     return await this.authorModel.create({
       nameAuthor,
       phone,

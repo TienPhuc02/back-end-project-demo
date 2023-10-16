@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { Chapter, ChapterDocument } from './schema/chapter.schema';
@@ -47,43 +47,36 @@ export class ChaptersService {
   async create(createChapterDto: CreateChapterDto) {
     const { titleChapter, descriptionChapter, publicYear, totalVol, vol } =
       createChapterDto;
-      for (const volTitle of vol) {
-        const existingChapter = await this.volModel.findOne({
-          nameVol: volTitle,
-        });
-  
-        if (existingChapter) {
-          throw new BadRequestException(
-            `Chương với tên "${volTitle}" đã tồn tại.Bạn vui lòng đặt với tên chương khác`,
-          );
-        }
-      }
-    const processedVols = await this.processVols(vol);
+    //
+    const processedVols = [];
+
+    for (const volTitle of vol) {
+      // Create a new chapter for each chapter title
+      const newVol = await this.volModel.create({
+        name: volTitle,
+        titleChapter: titleChapter,
+        nameAuthor: createChapterDto.nameAuthor,
+        nameBook: createChapterDto.nameBook,
+      });
+      processedVols.push(newVol._id);
+    }
     const existingChapter = await this.chapterModel.findOne({
       titleChapter,
     });
-    const existingAuthor = await this.authorModel.findOne({
-      authorName: createChapterDto.nameAuthor,
+    const existingAuthor = await this.chapterModel.findOne({
+      nameAuthor: createChapterDto.nameAuthor,
     });
-
-    if (existingAuthor) {
-      // Tên tác giả đã tồn tại, gán authorName từ kết quả truy vấn
-      createChapterDto.nameAuthor = existingAuthor.nameAuthor;
-    }
-    const existingBook = await this.bookModel.findOne({
+    const existingBook = await this.chapterModel.findOne({
       nameBook: createChapterDto.nameBook,
     });
 
-    if (existingBook) {
-      createChapterDto.nameBook = existingBook.nameBook;
-    }
-    if (existingChapter && existingAuthor) {
+    if (existingChapter && existingAuthor && existingBook) {
       existingChapter.descriptionChapter = descriptionChapter;
       existingChapter.publicYear = publicYear;
       existingChapter.totalVol = totalVol;
       existingChapter.vol = processedVols;
       existingChapter.nameAuthor = createChapterDto.nameAuthor;
-      existingChapter.nameBook = createChapterDto.nameBook;
+      existingChapter.nameBook = existingBook.nameBook;
       await existingChapter.save();
       return existingChapter;
     } else {
@@ -147,23 +140,18 @@ export class ChaptersService {
   }
 
   async update(id: string, updateChapterDto: UpdateChapterDto) {
-    const {
-      titleChapter,
-      descriptionChapter,
-      publicYear,
-      totalVol,
-      vol,
-    } = updateChapterDto;
+    const { titleChapter, descriptionChapter, publicYear, totalVol, vol } =
+      updateChapterDto;
     const processedVols = await this.processVols(vol);
     const existingChapter = await this.chapterModel.findOne({
       titleChapter,
     });
     const existingAuthor = await this.authorModel.findOne({
-      authorName: updateChapterDto.nameAuthor,
+      nameAuthor: updateChapterDto.nameAuthor,
     });
 
     if (existingAuthor) {
-      // Tên tác giả đã tồn tại, gán authorName từ kết quả truy vấn
+      // Tên tác giả đã tồn tại, gán nameAuthor từ kết quả truy vấn
       updateChapterDto.nameAuthor = existingAuthor.nameAuthor;
     }
     const existingBook = await this.bookModel.findOne({

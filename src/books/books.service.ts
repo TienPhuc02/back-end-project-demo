@@ -1,4 +1,4 @@
-import {  BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,34 +56,29 @@ export class BooksService {
       thumbnailBook,
       sliderBook,
     } = createBookDto;
+
+    const processedChapters = [];
+
     for (const chapterTitle of chapter) {
-      const existingChapter = await this.chapterModel.findOne({
+      // Create a new chapter for each chapter title
+      const newChapter = await this.chapterModel.create({
         titleChapter: chapterTitle,
+        nameBook: nameBook,
+        nameAuthor: createBookDto.nameAuthor,
       });
-
-      if (existingChapter) {
-        throw new BadRequestException(
-          `Chương với tên "${chapterTitle}" đã tồn tại.Bạn vui lòng đặt với tên chương khác`,
-        );
-      }
-    }
-    const processedChapters = await this.processChapters(chapter);
-
-    const existingAuthor = await this.authorModel.findOne({
-      authorName: createBookDto.nameAuthor,
-    });
-
-    if (existingAuthor) {
-      createBookDto.nameAuthor = existingAuthor.nameAuthor;
+      processedChapters.push(newChapter._id);
     }
     const existingBook = await this.bookModel.findOne({
       nameBook,
     });
+    const existingAuthor = await this.bookModel.findOne({
+      nameAuthor: createBookDto.nameAuthor,
+    });
 
-    if (existingBook) {
+    if (existingBook && existingAuthor) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameAuthor = createBookDto.nameAuthor;
+      existingBook.nameAuthor = existingAuthor.nameAuthor;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;
@@ -175,21 +170,16 @@ export class BooksService {
     } = updateBookDto;
     const processedChapters = await this.processChapters(chapter);
 
-    const existingAuthor = await this.authorModel.findOne({
-      authorName: updateBookDto.nameAuthor,
-    });
-
-    if (existingAuthor) {
-      updateBookDto.nameAuthor = existingAuthor.nameAuthor;
-    }
     const existingBook = await this.bookModel.findOne({
       nameBook,
     });
-
-    if (existingBook) {
+    const existingAuthor = await this.bookModel.findOne({
+      nameAuthor: updateBookDto.nameAuthor,
+    });
+    if (existingBook && existingAuthor) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameAuthor = updateBookDto.nameAuthor;
+      existingBook.nameAuthor = existingAuthor.nameAuthor;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;

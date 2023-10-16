@@ -10,6 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
+  app.useStaticAssets(join(__dirname, '..', 'public'));
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
   app.enableCors({
     origin: 'http://localhost:3000',
@@ -23,7 +24,6 @@ async function bootstrap() {
     defaultVersion: ['1', '2'], //v1,v2
     // prefix: 'api/v'
   });
-  app.useStaticAssets(join(__dirname, '..', 'public'));
   await app.listen(configService.get<string>('PORT'));
 }
 bootstrap();

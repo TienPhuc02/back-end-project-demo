@@ -8,7 +8,7 @@ export class CreateAuthorDto {
   @IsNotEmpty({ message: 'Please Enter Email' })
   email: string;
   @IsNotEmpty({ message: 'Please Enter Avatar' })
-  avatar: string;
+  avatar: string[];
   @IsNotEmpty({ message: 'Please Enter Gender' })
   gender: string;
   @IsNotEmpty({ message: 'Please Enter Nationality' })

@@ -14,7 +14,7 @@ export class Author {
   @Prop()
   email: string;
   @Prop()
-  avatar: string;
+  avatar: string[];
   @Prop()
   gender: string;
   @Prop()

@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthorDto } from './dto/create-author.dto';
-import { UpdateAuthorDto } from './dto/update-author.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
-import { Author, AuthorDocument } from './schema/author.schema';
+import { User, UserDocument } from './schema/user.schema';
 import { Book, BookDocument } from 'src/books/schema/book.schema';
 
 @Injectable()
-export class AuthorsService {
+export class UsersService {
   constructor(
-    @InjectModel(Author.name)
-    private authorModel: SoftDeleteModel<AuthorDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Book.name)
     private bookModel: SoftDeleteModel<BookDocument>,
   ) {}
@@ -38,9 +38,9 @@ export class AuthorsService {
     return processedBooks;
   }
 
-  async create(createAuthorDto: CreateAuthorDto) {
+  async create(createUserDto: CreateUserDto) {
     const {
-      nameAuthor,
+      nameUser,
       address,
       gender,
       nation,
@@ -48,7 +48,7 @@ export class AuthorsService {
       nameBook,
       avatar,
       totalBook,
-    } = createAuthorDto;
+    } = createUserDto;
 
     const processedBooks = [];
 
@@ -56,14 +56,15 @@ export class AuthorsService {
       // Create a new chapter for each chapter title
       const newBook = await this.bookModel.create({
         nameBook: nameBookItems,
-        nameAuthor: nameAuthor,
+        nameUser: nameUser,
       });
       processedBooks.push(newBook._id);
     }
-    return await this.authorModel.create({
-      nameAuthor,
+    return await this.userModel.create({
+      nameUser,
       phone,
       nation,
+      role: 'USER',
       totalBook,
       avatar,
       gender,
@@ -78,17 +79,17 @@ export class AuthorsService {
     delete filter.pageSize; // bỏ qua current và pageSize để lấy full item trước đã rồi lọc
     const offset: number = (+current - 1) * +pageSize; // bỏ qua bao nhiêu phần tử
     const defaultLimit: number = +pageSize ? +pageSize : 10; //lấy ra số phần tử trong 1 trang
-    const totalItems = (await this.authorModel.find(filter)).length; // lấy ra tổng số lượng của tất cả các phần tử
+    const totalItems = (await this.userModel.find(filter)).length; // lấy ra tổng số lượng của tất cả các phần tử
     const totalPages = Math.ceil(totalItems / defaultLimit); //lấy ra tổng số trang
     // if ((sort as any) === '-name') {
     //   // @ts-ignore: Unreachable code error
     //   sort = '-name';
     // }
-    // if ((sort as any) === '-author') {
+    // if ((sort as any) === '-user') {
     //   // @ts-ignore: Unreachable code error
-    //   sort = '-author';
+    //   sort = '-user';
     // }
-    const result = await this.authorModel
+    const result = await this.userModel
       .find(filter)
       // tìm theo điều kiện
       .skip(offset)
@@ -113,7 +114,7 @@ export class AuthorsService {
   }
 
   async findOne(id: string) {
-    return await this.authorModel.findOne({ _id: id }).populate({
+    return await this.userModel.findOne({ _id: id }).populate({
       path: 'nameBook',
       populate: {
         path: 'chapter',
@@ -124,24 +125,26 @@ export class AuthorsService {
     });
   }
 
-  async update(id: string, updateAuthorDto: UpdateAuthorDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const {
-      nameAuthor,
+      nameUser,
       address,
       gender,
       nation,
       phone,
+      role,
       avatar,
       totalBook,
       nameBook,
-    } = updateAuthorDto;
+    } = updateUserDto;
     const processedBooks = await this.processBooks(nameBook);
-    return await this.authorModel.updateOne(
+    return await this.userModel.updateOne(
       { _id: id },
       {
-        nameAuthor,
+        nameUser,
         address,
         gender,
+        role,
         nation,
         phone,
         avatar,
@@ -155,7 +158,7 @@ export class AuthorsService {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return `not found user`;
     }
-    await this.authorModel.updateOne({ _id: id });
-    return this.authorModel.softDelete({ _id: id });
+    await this.userModel.updateOne({ _id: id });
+    return this.userModel.softDelete({ _id: id });
   }
 }

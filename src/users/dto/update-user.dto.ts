@@ -1,10 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateAuthorDto } from './create-author.dto';
+import { CreateUserDto } from './create-user.dto';
 import { IsNotEmpty } from 'class-validator';
 
-export class UpdateAuthorDto extends PartialType(CreateAuthorDto) {
-  @IsNotEmpty({ message: 'Please Enter Name Author' })
-  nameAuthor: string;
+export class UpdateUserDto extends PartialType(CreateUserDto) {
+  @IsNotEmpty({ message: 'Please Enter Name User' })
+  nameUser: string;
   @IsNotEmpty({ message: 'Please Enter Address' })
   address: string;
   @IsNotEmpty({ message: 'Please Enter Email' })
@@ -13,6 +13,8 @@ export class UpdateAuthorDto extends PartialType(CreateAuthorDto) {
   avatar: string[];
   @IsNotEmpty({ message: 'Please Enter Gender' })
   gender: string;
+  @IsNotEmpty({ message: 'Please Enter Role' })
+  role: string;
   @IsNotEmpty({ message: 'Please Enter Nationality' })
   nation: string;
   @IsNotEmpty({ message: 'Please Enter Phone' })

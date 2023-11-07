@@ -32,9 +32,9 @@ export class PostsService {
     //   // @ts-ignore: Unreachable code error
     //   sort = '-name';
     // }
-    // if ((sort as any) === '-author') {
+    // if ((sort as any) === '-user') {
     //   // @ts-ignore: Unreachable code error
-    //   sort = '-author';
+    //   sort = '-user';
     // }
     const result = await this.postModel
       .find(filter)

@@ -35,9 +35,9 @@ export class VolsService {
     //   // @ts-ignore: Unreachable code error
     //   sort = '-name';
     // }
-    // if ((sort as any) === '-author') {
+    // if ((sort as any) === '-user') {
     //   // @ts-ignore: Unreachable code error
-    //   sort = '-author';
+    //   sort = '-user';
     // }
     const result = await this.volModel
       .find(filter)

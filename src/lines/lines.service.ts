@@ -14,11 +14,11 @@ export class LinesService {
     private lineModel: SoftDeleteModel<LineDocument>,
   ) {}
   async create(createLineDto: CreateLineDto) {
-    const { name, nameTransform,total } = createLineDto;
+    const { name, nameTransform, total } = createLineDto;
     return await this.lineModel.create({
       name,
       nameTransform,
-      total
+      total,
     });
   }
 
@@ -45,7 +45,7 @@ export class LinesService {
   //       if (processedVols.length > 0) {
   //         if (existingLines.length > 0) {
   //           for (const existingLine of existingLines) {
-  //             existingLine.vol = processedVols; 
+  //             existingLine.vol = processedVols;
   //             await existingLine.save();
   //           }
   //         } else {
@@ -60,8 +60,6 @@ export class LinesService {
   //   }
   //   return processedLines;
   // }
-
- 
 
   // async createListLine(lineList: CreateLineDto[]) {
   //   const processedLines = await this.processLinesAndVols(lineList);
@@ -79,9 +77,9 @@ export class LinesService {
     //   // @ts-ignore: Unreachable code error
     //   sort = '-name';
     // }
-    // if ((sort as any) === '-author') {
+    // if ((sort as any) === '-user') {
     //   // @ts-ignore: Unreachable code error
-    //   sort = '-author';
+    //   sort = '-user';
     // }
     const result = await this.lineModel
       .find(filter)
@@ -108,12 +106,15 @@ export class LinesService {
   }
 
   async findOne(id: string) {
-    return await this.lineModel.findOne({ _id: id })
+    return await this.lineModel.findOne({ _id: id });
   }
 
   async update(id: string, updateLineDto: UpdateLineDto) {
-    const { name, nameTransform,total } = updateLineDto;
-    return await this.lineModel.updateOne({ _id: id }, { name, nameTransform,total });
+    const { name, nameTransform, total } = updateLineDto;
+    return await this.lineModel.updateOne(
+      { _id: id },
+      { name, nameTransform, total },
+    );
   }
 
   async remove(id: string) {

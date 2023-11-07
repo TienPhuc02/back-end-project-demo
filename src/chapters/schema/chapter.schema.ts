@@ -9,7 +9,7 @@ export class Chapter {
   @Prop()
   titleChapter: string;
   @Prop()
-  nameAuthor: string;
+  nameUser: string;
   @Prop()
   nameBook: string;
   @Prop()

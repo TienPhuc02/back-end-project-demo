@@ -3,8 +3,8 @@ import { IsNotEmpty } from 'class-validator';
 export class CreateBookDto {
   @IsNotEmpty({ message: 'Please Enter Your nameBook' })
   nameBook: string;
-  @IsNotEmpty({ message: 'Please Enter Your nameAuthor' })
-  nameAuthor: string;
+  @IsNotEmpty({ message: 'Please Enter Your nameUser' })
+  nameUser: string;
   @IsNotEmpty({ message: 'Please Enter Your descriptionBook' })
   descriptionBook: string;
   @IsNotEmpty({ message: 'Please Enter Your publicYear' })

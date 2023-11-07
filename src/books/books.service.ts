@@ -7,7 +7,7 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import { Book, BookDocument } from './schema/book.schema';
 import { Chapter, ChapterDocument } from 'src/chapters/schema/chapter.schema';
-import { Author, AuthorDocument } from 'src/authors/schema/author.schema';
+import { User, UserDocument } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class BooksService {
@@ -16,8 +16,8 @@ export class BooksService {
     private bookModel: SoftDeleteModel<BookDocument>,
     @InjectModel(Chapter.name)
     private chapterModel: SoftDeleteModel<ChapterDocument>,
-    @InjectModel(Author.name)
-    private authorModel: SoftDeleteModel<AuthorDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
   ) {}
   async processChapters(chapterArray: string[]) {
     const processedChapters = [];
@@ -64,21 +64,21 @@ export class BooksService {
       const newChapter = await this.chapterModel.create({
         titleChapter: chapterTitle,
         nameBook: nameBook,
-        nameAuthor: createBookDto.nameAuthor,
+        nameUser: createBookDto.nameUser,
       });
       processedChapters.push(newChapter._id);
     }
     const existingBook = await this.bookModel.findOne({
       nameBook,
     });
-    const existingAuthor = await this.bookModel.findOne({
-      nameAuthor: createBookDto.nameAuthor,
+    const existingUser = await this.bookModel.findOne({
+      nameUser: createBookDto.nameUser,
     });
 
-    if (existingBook && existingAuthor) {
+    if (existingBook && existingUser) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameAuthor = existingAuthor.nameAuthor;
+      existingBook.nameUser = existingUser.nameUser;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;
@@ -91,7 +91,7 @@ export class BooksService {
     } else {
       const newBook = await this.bookModel.create({
         nameBook,
-        nameAuthor: createBookDto.nameAuthor,
+        nameUser: createBookDto.nameUser,
         descriptionBook,
         publicYear,
         publisher,
@@ -173,13 +173,13 @@ export class BooksService {
     const existingBook = await this.bookModel.findOne({
       nameBook,
     });
-    const existingAuthor = await this.bookModel.findOne({
-      nameAuthor: updateBookDto.nameAuthor,
+    const existingUser = await this.bookModel.findOne({
+      nameUser: updateBookDto.nameUser,
     });
-    if (existingBook && existingAuthor) {
+    if (existingBook && existingUser) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameAuthor = existingAuthor.nameAuthor;
+      existingBook.nameUser = existingUser.nameUser;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;
@@ -194,7 +194,7 @@ export class BooksService {
         { _id: id },
         {
           nameBook,
-          nameAuthor: updateBookDto.nameAuthor,
+          nameUser: updateBookDto.nameUser,
           descriptionBook,
           publicYear,
           publisher,

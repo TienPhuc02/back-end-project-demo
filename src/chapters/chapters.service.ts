@@ -7,7 +7,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import { Vol, VolDocument } from 'src/vols/schema/vol.schema';
-import { Author, AuthorDocument } from 'src/authors/schema/author.schema';
+import { User, UserDocument } from 'src/users/schema/user.schema';
 import { Book, BookDocument } from 'src/books/schema/book.schema';
 
 @Injectable()
@@ -17,8 +17,8 @@ export class ChaptersService {
     private chapterModel: SoftDeleteModel<ChapterDocument>,
     @InjectModel(Vol.name)
     private volModel: SoftDeleteModel<VolDocument>,
-    @InjectModel(Author.name)
-    private authorModel: SoftDeleteModel<AuthorDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Book.name)
     private bookModel: SoftDeleteModel<BookDocument>,
   ) {}
@@ -55,7 +55,7 @@ export class ChaptersService {
       const newVol = await this.volModel.create({
         name: volTitle,
         titleChapter: titleChapter,
-        nameAuthor: createChapterDto.nameAuthor,
+        nameUser: createChapterDto.nameUser,
         nameBook: createChapterDto.nameBook,
       });
       processedVols.push(newVol._id);
@@ -63,26 +63,26 @@ export class ChaptersService {
     const existingChapter = await this.chapterModel.findOne({
       titleChapter,
     });
-    const existingAuthor = await this.chapterModel.findOne({
-      nameAuthor: createChapterDto.nameAuthor,
+    const existingUser = await this.chapterModel.findOne({
+      nameUser: createChapterDto.nameUser,
     });
     const existingBook = await this.chapterModel.findOne({
       nameBook: createChapterDto.nameBook,
     });
 
-    if (existingChapter && existingAuthor && existingBook) {
+    if (existingChapter && existingUser && existingBook) {
       existingChapter.descriptionChapter = descriptionChapter;
       existingChapter.publicYear = publicYear;
       existingChapter.totalVol = totalVol;
       existingChapter.vol = processedVols;
-      existingChapter.nameAuthor = createChapterDto.nameAuthor;
+      existingChapter.nameUser = createChapterDto.nameUser;
       existingChapter.nameBook = existingBook.nameBook;
       await existingChapter.save();
       return existingChapter;
     } else {
       const newChapter = await this.chapterModel.create({
         titleChapter,
-        nameAuthor: createChapterDto.nameAuthor,
+        nameUser: createChapterDto.nameUser,
         nameBook: createChapterDto.nameBook,
         descriptionChapter,
         publicYear,
@@ -105,9 +105,9 @@ export class ChaptersService {
     //   // @ts-ignore: Unreachable code error
     //   sort = '-name';
     // }
-    // if ((sort as any) === '-author') {
+    // if ((sort as any) === '-user') {
     //   // @ts-ignore: Unreachable code error
-    //   sort = '-author';
+    //   sort = '-user';
     // }
     const result = await this.chapterModel
       .find(filter)
@@ -146,13 +146,13 @@ export class ChaptersService {
     const existingChapter = await this.chapterModel.findOne({
       titleChapter,
     });
-    const existingAuthor = await this.authorModel.findOne({
-      nameAuthor: updateChapterDto.nameAuthor,
+    const existingUser = await this.userModel.findOne({
+      nameUser: updateChapterDto.nameUser,
     });
 
-    if (existingAuthor) {
-      // Tên tác giả đã tồn tại, gán nameAuthor từ kết quả truy vấn
-      updateChapterDto.nameAuthor = existingAuthor.nameAuthor;
+    if (existingUser) {
+      // Tên tác giả đã tồn tại, gán nameUser từ kết quả truy vấn
+      updateChapterDto.nameUser = existingUser.nameUser;
     }
     const existingBook = await this.bookModel.findOne({
       nameBook: updateChapterDto.nameBook,
@@ -161,12 +161,12 @@ export class ChaptersService {
     if (existingBook) {
       updateChapterDto.nameBook = existingBook.nameBook;
     }
-    if (existingChapter && existingAuthor) {
+    if (existingChapter && existingUser) {
       existingChapter.descriptionChapter = descriptionChapter;
       existingChapter.publicYear = publicYear;
       existingChapter.totalVol = totalVol;
       existingChapter.vol = processedVols;
-      existingChapter.nameAuthor = updateChapterDto.nameAuthor;
+      existingChapter.nameUser = updateChapterDto.nameUser;
       existingChapter.nameBook = updateChapterDto.nameBook;
       await existingChapter.save();
       return existingChapter;
@@ -175,7 +175,7 @@ export class ChaptersService {
         { _id: id },
         {
           titleChapter,
-          nameAuthor: updateChapterDto.nameAuthor,
+          nameUser: updateChapterDto.nameUser,
           nameBook: updateChapterDto.nameBook,
           descriptionChapter,
           publicYear,

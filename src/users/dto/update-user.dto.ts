@@ -4,15 +4,17 @@ import { IsNotEmpty } from 'class-validator';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsNotEmpty({ message: 'Please Enter Name User' })
-  nameUser: string;
+  userName: string;
   @IsNotEmpty({ message: 'Please Enter Address' })
   address: string;
   @IsNotEmpty({ message: 'Please Enter Email' })
-  email: string;
+  emailAddress: string;
+  @IsNotEmpty({ message: 'Please Enter Email' })
+  firstName: string;
+  @IsNotEmpty({ message: 'Please Enter Email' })
+  lastName: string;
   @IsNotEmpty({ message: 'Please Enter Avatar' })
   avatar: string[];
-  @IsNotEmpty({ message: 'Please Enter Gender' })
-  gender: string;
   @IsNotEmpty({ message: 'Please Enter Role' })
   role: string;
   @IsNotEmpty({ message: 'Please Enter Nationality' })

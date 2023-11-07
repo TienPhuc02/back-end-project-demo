@@ -7,11 +7,11 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
 export class User {
   @Prop()
-  nameUser: string;
+  userName: string;
   @Prop()
   address: string;
   @Prop()
-  email: string;
+  emailAddress: string;
   @Prop()
   password: string;
   @Prop()
@@ -41,17 +41,17 @@ export class User {
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop({ type: Object })
   updatedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop({ type: Object })
   deletedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
 }
 

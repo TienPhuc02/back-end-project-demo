@@ -55,7 +55,7 @@ export class ChaptersService {
       const newVol = await this.volModel.create({
         name: volTitle,
         titleChapter: titleChapter,
-        nameUser: createChapterDto.nameUser,
+        userName: createChapterDto.userName,
         nameBook: createChapterDto.nameBook,
       });
       processedVols.push(newVol._id);
@@ -64,7 +64,7 @@ export class ChaptersService {
       titleChapter,
     });
     const existingUser = await this.chapterModel.findOne({
-      nameUser: createChapterDto.nameUser,
+      userName: createChapterDto.userName,
     });
     const existingBook = await this.chapterModel.findOne({
       nameBook: createChapterDto.nameBook,
@@ -75,14 +75,14 @@ export class ChaptersService {
       existingChapter.publicYear = publicYear;
       existingChapter.totalVol = totalVol;
       existingChapter.vol = processedVols;
-      existingChapter.nameUser = createChapterDto.nameUser;
+      existingChapter.userName = createChapterDto.userName;
       existingChapter.nameBook = existingBook.nameBook;
       await existingChapter.save();
       return existingChapter;
     } else {
       const newChapter = await this.chapterModel.create({
         titleChapter,
-        nameUser: createChapterDto.nameUser,
+        userName: createChapterDto.userName,
         nameBook: createChapterDto.nameBook,
         descriptionChapter,
         publicYear,
@@ -147,12 +147,12 @@ export class ChaptersService {
       titleChapter,
     });
     const existingUser = await this.userModel.findOne({
-      nameUser: updateChapterDto.nameUser,
+      userName: updateChapterDto.userName,
     });
 
     if (existingUser) {
-      // Tên tác giả đã tồn tại, gán nameUser từ kết quả truy vấn
-      updateChapterDto.nameUser = existingUser.nameUser;
+      // Tên tác giả đã tồn tại, gán userName từ kết quả truy vấn
+      updateChapterDto.userName = existingUser.userName;
     }
     const existingBook = await this.bookModel.findOne({
       nameBook: updateChapterDto.nameBook,
@@ -166,7 +166,7 @@ export class ChaptersService {
       existingChapter.publicYear = publicYear;
       existingChapter.totalVol = totalVol;
       existingChapter.vol = processedVols;
-      existingChapter.nameUser = updateChapterDto.nameUser;
+      existingChapter.userName = updateChapterDto.userName;
       existingChapter.nameBook = updateChapterDto.nameBook;
       await existingChapter.save();
       return existingChapter;
@@ -175,7 +175,7 @@ export class ChaptersService {
         { _id: id },
         {
           titleChapter,
-          nameUser: updateChapterDto.nameUser,
+          userName: updateChapterDto.userName,
           nameBook: updateChapterDto.nameBook,
           descriptionChapter,
           publicYear,

@@ -9,7 +9,7 @@ export class Book {
   @Prop()
   nameBook: string;
   @Prop()
-  nameUser: string;
+  userName: string;
   @Prop()
   descriptionBook: string;
   @Prop()
@@ -37,12 +37,12 @@ export class Book {
   @Prop({ type: Object })
   createdBy: {
     id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop({ type: Object })
   updatedBy: {
     id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop()
   deleted: boolean;

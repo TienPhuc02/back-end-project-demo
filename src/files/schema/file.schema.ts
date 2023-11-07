@@ -16,17 +16,17 @@ export class File {
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop({ type: Object })
   updatedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop({ type: Object })
   deletedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    email: string;
+    emailAddress: string;
   };
   @Prop()
   deletedAt: Date;

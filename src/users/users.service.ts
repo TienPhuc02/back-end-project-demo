@@ -1,164 +1,192 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import aqp from 'api-query-params';
-import mongoose from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
-import { Book, BookDocument } from 'src/books/schema/book.schema';
+import mongoose from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
+import aqp from 'api-query-params';
+import { IUser } from './user.interface';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name)
-    private userModel: SoftDeleteModel<UserDocument>,
-    @InjectModel(Book.name)
-    private bookModel: SoftDeleteModel<BookDocument>,
+    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
   ) {}
-  async processBooks(bookArray: string[]) {
-    const processedBooks = [];
-
-    for (const book of bookArray) {
-      // Check if the chapter already exists in the database
-      const existingBook = await this.bookModel.findOne({
-        nameBook: book,
-      });
-
-      if (existingBook) {
-        // Use the existing chapter's Object ID
-        processedBooks.push(existingBook._id);
-      } else {
-        // Create a new chapter and use its Object ID
-        const newBook = await this.bookModel.create({ nameBook: book });
-        processedBooks.push(newBook._id);
-      }
-    }
-
-    return processedBooks;
-  }
-
-  async create(createUserDto: CreateUserDto) {
+  hashPassword = (password: string) => {
+    const salt = genSaltSync(10);
+    const hash = hashSync(password, salt);
+    return hash;
+  };
+  async create(createUserDto: CreateUserDto, user: IUser) {
     const {
-      nameUser,
+      emailAddress,
+      userName,
       address,
-      gender,
-      nation,
+      role,
+      firstName,
+      lastName,
       phone,
-      nameBook,
-      avatar,
+      nation,
       totalBook,
     } = createUserDto;
-
-    const processedBooks = [];
-
-    for (const nameBookItems of nameBook) {
-      // Create a new chapter for each chapter title
-      const newBook = await this.bookModel.create({
-        nameBook: nameBookItems,
-        nameUser: nameUser,
-      });
-      processedBooks.push(newBook._id);
-    }
-    return await this.userModel.create({
-      nameUser,
+    const newUser = await this.userModel.create({
+      emailAddress,
+      userName,
+      role,
+      firstName,
+      lastName,
       phone,
       nation,
-      role: 'USER',
-      totalBook,
-      avatar,
-      gender,
       address,
-      nameBook: processedBooks,
+      totalBook,
+      createdBy: {
+        _id: user._id,
+        emailAddress: user.emailAddress,
+      },
+    });
+    return {
+      _id: newUser._id,
+      createdBy: {
+        _id: user._id,
+        emailAddress: user.emailAddress,
+      },
+    };
+  }
+  async register(registerUserDto: RegisterUserDto) {
+    const {
+      emailAddress,
+      password,
+      userName,
+      address,
+      firstName,
+      lastName,
+      passwordConfirm,
+      phone,
+    } = registerUserDto;
+    const isExist = this.userModel.findOne({ emailAddress });
+    if (!isExist) {
+      throw new BadRequestException(`Email: ${emailAddress} đã tồn tại.`);
+    }
+    const hashPassword = this.hashPassword(password);
+    return await this.userModel.create({
+      emailAddress,
+      passwordConfirm,
+      lastName,
+      firstName,
+      password: hashPassword,
+      userName,
+      address,
+      phone,
     });
   }
 
-  async findAll(current: string, pageSize: string, qs: string) {
-    const { filter, sort, population, projection } = aqp(qs);
+  async findAll(current: number, pageSize: number, qs: string) {
+    const { filter, sort, population } = aqp(qs);
     delete filter.current;
-    delete filter.pageSize; // bỏ qua current và pageSize để lấy full item trước đã rồi lọc
-    const offset: number = (+current - 1) * +pageSize; // bỏ qua bao nhiêu phần tử
-    const defaultLimit: number = +pageSize ? +pageSize : 10; //lấy ra số phần tử trong 1 trang
-    const totalItems = (await this.userModel.find(filter)).length; // lấy ra tổng số lượng của tất cả các phần tử
-    const totalPages = Math.ceil(totalItems / defaultLimit); //lấy ra tổng số trang
-    // if ((sort as any) === '-name') {
-    //   // @ts-ignore: Unreachable code error
-    //   sort = '-name';
-    // }
-    // if ((sort as any) === '-user') {
-    //   // @ts-ignore: Unreachable code error
-    //   sort = '-user';
-    // }
+    delete filter.pageSize;
+    const offset: number = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize ? +pageSize : 10;
+    const totalItems = (await this.userModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+    if ((sort as any) === '-updatedAt') {
+      // @ts-ignore: Unreachable code error
+      sort = '-updatedAt';
+    }
     const result = await this.userModel
       .find(filter)
-      // tìm theo điều kiện
       .skip(offset)
-      // bỏ qua bao nhiêu phần tử
       .limit(defaultLimit)
-      // bao nhiêu phần tử 1 trang
-      .select(projection as any)
       .sort(sort as any)
       .populate(population)
+      .select('-password')
       .exec();
-    //chọc xuống database nên sẽ là hàm promise async await
     return {
       meta: {
-        current: current, //trang hiện tại
-        pageSize: pageSize, //số lượng bản ghi đã lấy
-        pages: totalPages, //tổng số trang với điều kiện query
-        total: totalItems, // tổng số phần tử (số bản ghi)
+        current: current, //trang hien tai
+        pageSize: pageSize, // so luong ban ghi 1 trang
+        pages: totalPages, //tong so trang
+        total: totalItems, //tong so ban ghi
       },
-      result, //kết quả query
-      // không cần phải truyền giá trị currentPage vào hàm findAll vì nó được tính toán trong hàm dựa trên offset và defaultLimit.
+      result,
     };
   }
 
-  async findOne(id: string) {
-    return await this.userModel.findOne({ _id: id }).populate({
-      path: 'nameBook',
-      populate: {
-        path: 'chapter',
-        populate: {
-          path: 'vol',
-        },
-      },
-    });
+  findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return 'not found user';
+    }
+    return this.userModel.findOne({ _id: id }).select('-password');
+  }
+  findOneByUsername(username: string) {
+    return this.userModel.findOne({ emailAddress: username });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  isValidPassword = (password: string, hash: string) => {
+    return compareSync(password, hash);
+  };
+  update(id: string, updateUserDto: UpdateUserDto, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return 'not found user';
+    }
     const {
-      nameUser,
+      emailAddress,
+      userName,
       address,
-      gender,
-      nation,
-      phone,
+      firstName,
+      lastName,
       role,
       avatar,
+      nation,
       totalBook,
       nameBook,
     } = updateUserDto;
-    const processedBooks = await this.processBooks(nameBook);
-    return await this.userModel.updateOne(
+    return this.userModel.updateOne(
       { _id: id },
       {
-        nameUser,
-        address,
-        gender,
-        role,
-        nation,
-        phone,
+        emailAddress,
+        userName,
         avatar,
+        nation,
+        nameBook,
+        address,
         totalBook,
-        nameBook: processedBooks,
+        firstName,
+        lastName,
+        role,
+        updatedBy: {
+          _id: user._id,
+          emailAddress: user.emailAddress,
+        },
       },
     );
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return `not found user`;
+      return 'not found user';
     }
-    await this.userModel.updateOne({ _id: id });
+    await this.userModel.updateOne(
+      { _id: id },
+      {
+        deletedBy: {
+          _id: user._id,
+          emailAddress: user.emailAddress,
+        },
+      },
+    );
     return this.userModel.softDelete({ _id: id });
   }
+  updateUserToken = async (refreshToken: string, _id: string) => {
+    return await this.userModel.updateOne(
+      { _id },
+      {
+        refreshToken,
+      },
+    );
+  };
+  findUserByToken = async (refreshToken: string) => {
+    return await this.userModel.findOne({ refreshToken });
+  };
 }

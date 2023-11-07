@@ -5,8 +5,8 @@ import { IsArray, IsNotEmpty } from 'class-validator';
 export class UpdateChapterDto extends PartialType(CreateChapterDto) {
   @IsNotEmpty({ message: 'Please Enter Your Title Chapter' })
   titleChapter: string;
-  @IsNotEmpty({ message: 'Please Enter Your nameUser' })
-  nameUser: string;
+  @IsNotEmpty({ message: 'Please Enter Your userName' })
+  userName: string;
   @IsNotEmpty({ message: 'Please Enter Your nameBook' })
   nameBook: string;
   @IsNotEmpty({ message: 'Please Enter Your descriptionChapter' })

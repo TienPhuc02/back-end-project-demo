@@ -5,8 +5,8 @@ import { IsNotEmpty } from 'class-validator';
 export class UpdateBookDto extends PartialType(CreateBookDto) {
   @IsNotEmpty({ message: 'Please Enter Your nameBook' })
   nameBook: string;
-  @IsNotEmpty({ message: 'Please Enter Your nameUser' })
-  nameUser: string;
+  @IsNotEmpty({ message: 'Please Enter Your userName' })
+  userName: string;
   @IsNotEmpty({ message: 'Please Enter Your descriptionBook' })
   descriptionBook: string;
   @IsNotEmpty({ message: 'Please Enter Your publicYear' })

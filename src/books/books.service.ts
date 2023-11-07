@@ -64,7 +64,7 @@ export class BooksService {
       const newChapter = await this.chapterModel.create({
         titleChapter: chapterTitle,
         nameBook: nameBook,
-        nameUser: createBookDto.nameUser,
+        userName: createBookDto.userName,
       });
       processedChapters.push(newChapter._id);
     }
@@ -72,13 +72,13 @@ export class BooksService {
       nameBook,
     });
     const existingUser = await this.bookModel.findOne({
-      nameUser: createBookDto.nameUser,
+      userName: createBookDto.userName,
     });
 
     if (existingBook && existingUser) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameUser = existingUser.nameUser;
+      existingBook.userName = existingUser.userName;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;
@@ -91,7 +91,7 @@ export class BooksService {
     } else {
       const newBook = await this.bookModel.create({
         nameBook,
-        nameUser: createBookDto.nameUser,
+        userName: createBookDto.userName,
         descriptionBook,
         publicYear,
         publisher,
@@ -174,12 +174,12 @@ export class BooksService {
       nameBook,
     });
     const existingUser = await this.bookModel.findOne({
-      nameUser: updateBookDto.nameUser,
+      userName: updateBookDto.userName,
     });
     if (existingBook && existingUser) {
       existingBook.descriptionBook = descriptionBook;
       existingBook.publicYear = publicYear;
-      existingBook.nameUser = existingUser.nameUser;
+      existingBook.userName = existingUser.userName;
       existingBook.publisher = publisher;
       existingBook.genre = genre;
       existingBook.totalChapter = totalChapter;
@@ -194,7 +194,7 @@ export class BooksService {
         { _id: id },
         {
           nameBook,
-          nameUser: updateBookDto.nameUser,
+          userName: updateBookDto.userName,
           descriptionBook,
           publicYear,
           publisher,

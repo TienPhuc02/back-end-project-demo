@@ -9,10 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { ResponseMessage } from 'src/decorator/customize';
+import { ResponseMessage, User } from 'src/decorator/customize';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IUser } from './user.interface';
 
 @Controller('users')
 export class UsersController {
@@ -20,15 +21,15 @@ export class UsersController {
 
   @Post()
   @ResponseMessage('Create User Success!!')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(@Body() createUserDto: CreateUserDto,@User() user: IUser) {
+    return this.usersService.create(createUserDto,user);
   }
 
   @Get()
   @ResponseMessage('Get User With Paginate Success!!')
   findAll(
-    @Query('current') current: string,
-    @Query('pageSize') pageSize: string,
+    @Query('current') current: number,
+    @Query('pageSize') pageSize: number,
     @Query() qs: string,
   ) {
     return this.usersService.findAll(current, pageSize, qs);
@@ -41,13 +42,17 @@ export class UsersController {
   }
   @Patch(':id')
   @ResponseMessage('Update User By Id Success!!')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: IUser,
+  ) {
+    return this.usersService.update(id, updateUserDto, user);
   }
 
   @Delete(':id')
   @ResponseMessage('Remove User By Id Success!!')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.usersService.remove(id, user);
   }
 }
